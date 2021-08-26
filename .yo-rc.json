@@ -1,0 +1,37 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.polixis.task1"
+    },
+    "jhipsterVersion": "6.10.5",
+    "applicationType": "monolith",
+    "baseName": "task1",
+    "packageName": "com.polixis.task1",
+    "packageFolder": "com/polixis/task1",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "Zjg5YzdjMTEyOTNkODViZWNjMjRmMzFlMWUyYTk2M2E1YzQ2Y2Y2MWZmOTczMDFkZDgxZWNhMTA3YTA1NGFkZmY0MzVhMWJmZWZhNmVmMDZkYzg0OTZlM2Q4YzdlMjZiMWNhZjMxZGFmYmQ4MGMxNzE4ZGEzNzkxNWRjNWFiMzk=",
+    "embeddableLaunchScript": false,
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "skipClient": true,
+    "creationTimestamp": 1630010067812,
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": false,
+    "blueprints": []
+  }
+}
