@@ -14,10 +14,10 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {})
 public interface PersonMapper extends EntityMapper<PersonDTO, Person> {
 
+    @Mapping(target = "id", ignore = true)
     @Override
     Person toEntity(PersonDTO dto);
 
-    @Mapping(target = "id", ignore = true)
     @Override
     PersonDTO toDto(Person entity);
 

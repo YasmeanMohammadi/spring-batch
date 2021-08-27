@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-public class unzipService {
+public class UnzipService {
 
     public void unzip(String filename, String destinationDirectory)
         throws IOException {

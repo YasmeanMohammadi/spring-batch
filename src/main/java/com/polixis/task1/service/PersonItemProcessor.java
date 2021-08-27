@@ -1,23 +1,23 @@
 package com.polixis.task1.service;
 
+import com.polixis.task1.service.dto.PersonDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
-public class CoffeeItemProcessor implements ItemProcessor<Coffee, Coffee> {
+public class PersonItemProcessor implements ItemProcessor<PersonDTO, PersonDTO> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(com.baeldung.batch.CoffeeItemProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonItemProcessor.class);
 
     @Override
-    public Coffee process(final Coffee coffee) throws Exception {
-        String brand = coffee.getBrand().toUpperCase();
-        String origin = coffee.getOrigin().toUpperCase();
-        String chracteristics = coffee.getCharacteristics().toUpperCase();
+    public PersonDTO process(PersonDTO person) throws Exception {
 
-        Coffee transformedCoffee = new Coffee(brand, origin, chracteristics);
-        LOGGER.info("Converting ( {} ) into ( {} )", coffee, transformedCoffee);
+        LOGGER.info("processing person data.....{}", person);
 
-        return transformedCoffee;
+        PersonDTO transformedPerson = new PersonDTO(person.getFirstName(), person.getLastName(), person.getDate());
+        LOGGER.info("Converting ( {} ) into ( {} )", person, transformedPerson);
+
+        return transformedPerson;
     }
 
 }

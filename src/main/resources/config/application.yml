@@ -163,3 +163,7 @@ jhipster:
 # ===================================================================
 
 # application:
+
+fileInput:
+  dataFile: /data/part_*.csv
+

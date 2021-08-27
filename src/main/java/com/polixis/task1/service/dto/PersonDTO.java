@@ -7,7 +7,7 @@ import java.io.Serializable;
  * A DTO for the {@link com.polixis.task1.domain.Person} entity.
  */
 public class PersonDTO implements Serializable {
-    
+
     private Long id;
 
     private String firstName;
@@ -16,7 +16,15 @@ public class PersonDTO implements Serializable {
 
     private Instant date;
 
-    
+    public PersonDTO() {
+    }
+
+    public PersonDTO(String firstName, String lastName, Instant date) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.date = date;
+    }
+
     public Long getId() {
         return id;
     }

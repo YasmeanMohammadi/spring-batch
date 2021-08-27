@@ -32,6 +32,7 @@
     "dtoSuffix": "DTO",
     "otherModules": [],
     "enableTranslation": false,
-    "blueprints": []
+    "blueprints": [],
+    "lastLiquibaseTimestamp": 1630010478000
   }
 }

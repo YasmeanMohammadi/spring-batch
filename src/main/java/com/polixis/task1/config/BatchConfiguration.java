@@ -1,81 +1,132 @@
-package com.baeldung.batch;
+package com.polixis.task1.config;
 
-import javax.sql.DataSource;
-
+import com.polixis.task1.security.UnzipService;
+import com.polixis.task1.service.PersonItemProcessor;
+import com.polixis.task1.service.PersonService;
+import com.polixis.task1.service.dto.PersonDTO;
+import com.polixis.task1.service.job.ServiceItemWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+
+import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
+
+//    @Value("${fileInput.zipFile}")
+//    private String zipPath;
+//
+//    @Value("${fileInput.directory}")
+//    private String zipDestinationDir;
+
+    @Value("${fileInput.dataFile}")
+    private String inputResources;
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
 
     @Autowired
     public StepBuilderFactory stepBuilderFactory;
-    
-    @Value("${file.input}")
-    private String fileInput;
+
+    @Autowired
+    PersonService personService;
+
+    @Autowired
+    UnzipService unzipService;
+
+//    @Value("${fileInput.directory}")
+//    private String fileInput;
 
     @Bean
-    public FlatFileItemReader<Coffee> reader() {
-        return new FlatFileItemReaderBuilder<Coffee>().name("coffeeItemReader")
-            .resource(new ClassPathResource(fileInput))
-            .delimited()
-            .names(new String[] { "brand", "origin", "characteristics" })
-            .fieldSetMapper(new BeanWrapperFieldSetMapper<Coffee>() {{
-                setTargetType(Coffee.class);
-             }})
-            .build();
+    public PersonItemProcessor processor() {
+        return new PersonItemProcessor();
     }
 
     @Bean
-    public CoffeeItemProcessor processor() {
-        return new CoffeeItemProcessor();
-    }
-
-    @Bean
-    public JdbcBatchItemWriter<Coffee> writer(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<Coffee>().itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-            .sql("INSERT INTO coffee (brand, origin, characteristics) VALUES (:brand, :origin, :characteristics)")
-            .dataSource(dataSource)
-            .build();
-    }
-
-    @Bean
-    public Job importUserJob(JobCompletionNotificationListener listener, Step step1) {
-        return jobBuilderFactory.get("importUserJob")
+    public Job readCSVFilesJob() throws IOException {
+        return jobBuilderFactory
+            .get("readCSVFilesJob")
             .incrementer(new RunIdIncrementer())
-            .listener(listener)
-            .flow(step1)
-            .end()
+            .start(step1())
             .build();
     }
 
     @Bean
-    public Step step1(JdbcBatchItemWriter<Coffee> writer) {
-        return stepBuilderFactory.get("step1")
-            .<Coffee, Coffee> chunk(10)
-            .reader(reader())
+    public MultiResourceItemReader<PersonDTO> multiResourceItemReader()
+    {
+        Resource[] resources = null;
+        ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
+        try {
+            resources = patternResolver.getResources(inputResources);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MultiResourceItemReader<PersonDTO> resourceItemReader = new MultiResourceItemReader<PersonDTO>();
+        resourceItemReader.setResources(resources);
+        resourceItemReader.setDelegate(reader());
+        return resourceItemReader;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Bean
+    public FlatFileItemReader<PersonDTO> reader()
+    {
+        //Create reader instance
+        FlatFileItemReader<PersonDTO> reader = new FlatFileItemReader<PersonDTO>();
+
+        //Set number of lines to skips. Use it if file has header rows.
+        reader.setLinesToSkip(1);
+
+        //Configure how each line will be parsed and mapped to different values
+        reader.setLineMapper(new DefaultLineMapper() {
+            {
+                //3 columns in each row
+                setLineTokenizer(new DelimitedLineTokenizer() {
+                    {
+                        setNames(new String[] {null ,"firstName", "lastName", "date"});
+                    }
+                });
+                //Set values in PersonDTO class
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<PersonDTO>() {
+                    {
+                        setTargetType(PersonDTO.class);
+                    }
+                });
+            }
+        });
+        return reader;
+    }
+
+    @Bean
+    public Step step1() {
+        return stepBuilderFactory.get("step1").<PersonDTO, PersonDTO>chunk(5)
+            .reader(multiResourceItemReader())
             .processor(processor())
-            .writer(writer)
+            .writer(writer())
             .build();
+    }
+
+    @Bean
+    public ServiceItemWriter<PersonDTO> writer()
+    {
+        return new ServiceItemWriter<PersonDTO>();
     }
 
 }
